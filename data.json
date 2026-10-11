@@ -1,0 +1,42 @@
+{
+ "version": 1,
+ "rounds": [
+  {
+   "id": 1,
+   "words": [
+    {
+     "id": "mv3ox6zqvxhj",
+     "en": "vendor",
+     "meanings": [
+      {
+       "pos": "n.",
+       "ko": "행상인, 노점 상인",
+       "syn": "seller, merchant"
+      },
+      {
+       "pos": "n.",
+       "ko": "판매 회사",
+       "syn": ""
+      }
+     ]
+    },
+    {
+     "id": "mv3p40c9i13k",
+     "en": "align",
+     "meanings": [
+      {
+       "pos": "v.",
+       "ko": "정렬하다, 나란히 하다",
+       "syn": "arrange, line up"
+      },
+      {
+       "pos": "v.",
+       "ko": "조정하다",
+       "syn": ""
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
