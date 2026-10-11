@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>영어 단어장</title>
+<style>
+/* ===== 1. 디자인 변수 (색상/글꼴은 여기서 바꾸세요) ===== */
+:root{
+  --bg:#f6f3ec; --card:#fff; --ink:#23262f; --muted:#767b88; --line:#e4dfd2;
+  --main:#2f5bd8; --main-d:#2347ad; --ok:#1c8a4b; --ok-bg:#e3f5ea;
+  --bad:#c93a3a; --bad-bg:#fbe7e7; --pos:#8a4fd1; --pos-bg:#f0e7fb; --syn:#b86a00; --syn-bg:#fdf0da;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.55;
+  font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+h1{margin:0;font-size:1.5rem} h1 span{color:var(--main)}
+h2{margin:0 0 10px;font-size:1.15rem}
+.tabs{display:flex;gap:6px;background:#e9e4d6;padding:4px;border-radius:12px}
+.tabs button{border:0;background:transparent;padding:8px 18px;border-radius:9px;font-size:1rem;cursor:pointer;color:var(--muted);font-weight:600}
+.tabs button.on{background:var(--card);color:var(--main);box-shadow:0 1px 3px #0002}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.muted{color:var(--muted)} small{color:var(--muted)}
+button{font-family:inherit}
+.btn{border:0;background:var(--main);color:#fff;padding:10px 16px;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--main-d)}
+.btn.sub{background:#eceff7;color:var(--main)} .btn.sub:hover{background:#dde3f3}
+.btn.del{background:var(--bad-bg);color:var(--bad)} .btn.sm{padding:5px 10px;font-size:.85rem}
+label{display:block;font-weight:600;font-size:.9rem;margin:10px 0 4px}
+input[type=text],input[type=number],input[type=password],select{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:1rem;font-family:inherit;background:#fff}
+input[type=text]:focus,input[type=number]:focus,input[type=password]:focus,select:focus{outline:none;border-color:var(--main)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer;font-size:.95rem}
+.chip.on{background:var(--main);border-color:var(--main);color:#fff} .chip.on small{color:#dfe7ff}
+/* 단어 카드 */
+.word{border-left:5px solid var(--main);background:#fcfbf8;border-radius:10px;padding:12px 14px;margin-top:10px;
+  display:grid;grid-template-columns:1fr auto;gap:8px}
+.word .en{font-size:1.25rem;font-weight:800}
+.tag{display:inline-block;border-radius:6px;padding:2px 8px;font-size:.88rem;margin:3px 4px 0 0}
+.tag.pos{background:var(--pos-bg);color:var(--pos)} .tag.syn{background:var(--syn-bg);color:var(--syn)}
+.tag.ok{background:var(--ok-bg);color:var(--ok)} .tag.bad{background:var(--bad-bg);color:var(--bad)}
+.tag.ex{background:#eee;color:#777;text-decoration:line-through}
+.tag.none{background:#eee;color:#666}
+.lbl{font-size:.78rem;color:var(--muted);margin-right:4px}
+/* 테스트 */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.progress{height:8px;background:#e9e4d6;border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress div{height:100%;background:var(--main);transition:width .3s}
+.prompt{text-align:center;padding:22px 10px;background:#f1f4fd;border-radius:12px;margin:8px 0 6px}
+.prompt .big{font-size:2rem;font-weight:800;word-break:break-word}
+.result-box{border-radius:12px;padding:12px 14px;margin-top:12px}
+.result-box.ok{background:var(--ok-bg);border:1.5px solid var(--ok)}
+.result-box.bad{background:var(--bad-bg);border:1.5px solid var(--bad)}
+.cmp{display:grid;grid-template-columns:90px 1fr;gap:4px 8px;margin-top:8px;font-size:.98rem}
+.cmp b{color:var(--muted);font-weight:600}
+.mark-ok{color:var(--ok);font-weight:700} .mark-bad{color:var(--bad);font-weight:700}
+.score{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;margin:12px 0}
+.score div{background:#f1f4fd;border-radius:12px;padding:12px 4px} .score b{display:block;font-size:1.6rem}
+table{width:100%;border-collapse:collapse;font-size:.92rem} th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left}
+@media(max-width:560px){
+  .grid2{grid-template-columns:1fr} .score{grid-template-columns:repeat(2,1fr)}
+  .word{grid-template-columns:1fr} .prompt .big{font-size:1.6rem} .cmp{grid-template-columns:70px 1fr}
+}
+/* 품사+뜻 입력 줄 */
+.mrow{display:grid;grid-template-columns:130px 1fr auto;gap:8px;margin-top:10px;align-items:center;background:#fcfbf8;border:1px solid var(--line);border-radius:10px;padding:8px}
+.mrow .mSyn{grid-column:1/-1}
+.mline .tag.syn{margin-left:6px}
+.setbox{border-top:1px dashed var(--line);margin-top:8px;padding-top:4px}
+.bsyn{margin-top:8px}
+.mrow select{padding:11px 6px}
+.mline{margin-top:3px}
+button:disabled,input:disabled,select:disabled{opacity:.6;cursor:default}
+@media(max-width:560px){.mrow{grid-template-columns:104px 1fr auto}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>📖 <span>English</span> 단어장</h1>
+    <nav class="tabs">
+      <button id="tabAdmin" class="on">관리자</button>
+      <button id="tabTest">테스트</button>
+      <button id="tabSync">☁ 동기화</button>
+    </nav>
+    <small id="syncStatus" class="muted" style="cursor:pointer;width:100%;text-align:right"></small>
+  </header>
+
+  <!-- ===== 2. 관리자 화면 ===== -->
+  <section id="viewAdmin">
+    <div class="card" id="roBanner" hidden style="background:#fff7e0;border-color:#f0d9a0">
+      🔒 이 기기는 <b>읽기 전용</b>입니다. 단어를 수정하려면 <b>☁ 동기화</b> 탭에서 GitHub 토큰을 입력하세요. (테스트는 그대로 할 수 있습니다)
+    </div>
+    <div class="card">
+      <h2>회차 목록 <small id="totalInfo"></small></h2>
+      <div class="row" style="margin-bottom:12px">
+        <input type="number" id="inRoundNo" min="1" step="1" style="width:120px" placeholder="회차 번호">
+        <button class="btn sm" data-act="newRound">＋ 회차 만들기</button>
+        <small id="roundMsg"></small>
+      </div>
+      <div class="row" id="roundChips"></div>
+      <div style="margin-top:10px"><button class="btn sub sm" data-act="dlAll">⬇ 전체 회차 표 다운로드</button></div>
+    </div>
+
+    <div class="card" id="wordPanel" hidden>
+      <div class="row" style="justify-content:space-between">
+        <h2 id="panelTitle"></h2>
+        <div class="row">
+          <button class="btn sub sm" data-act="dlRound">⬇ 이 회차 표 다운로드</button>
+          <button class="btn del sm" data-act="delRound">이 회차 삭제</button>
+        </div>
+      </div>
+      <label for="inEn">① 영어 단어</label>
+      <input type="text" id="inEn" placeholder="예: abandon" autocomplete="off">
+      <label>② 품사 · 한글 뜻 · 유의어 <small>(뜻·유의어는 쉼표 , 로 여러 개 입력 · 공백은 자동 정리 · 뜻마다 유의어가 다르면 ＋ 버튼으로 세트 추가)</small></label>
+      <div class="mrows" id="meaningRows"></div>
+      <button class="btn sub sm" type="button" data-act="addMeaning" data-target="#meaningRows" style="margin-top:8px">＋ 품사/뜻 추가</button>
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="btnSave">단어 추가</button>
+        <button class="btn sub" id="btnCancel" hidden>수정 취소</button>
+        <small id="formMsg"></small>
+      </div>
+      <h2 style="margin-top:20px">등록된 단어</h2>
+      <div id="wordList"></div>
+    </div>
+  </section>
+
+  <!-- ===== 3. 테스트 화면 ===== -->
+  <section id="viewTest" hidden>
+    <div class="card" id="setup">
+      <h2>테스트 설정</h2>
+      <label for="selRound">회차 선택</label>
+      <select id="selRound"></select>
+      <label>유형 선택</label>
+      <div class="row">
+        <label class="chip" style="margin:0"><input type="radio" name="type" value="A" checked> 유형 A: 영어 → 뜻</label>
+        <label class="chip" style="margin:0"><input type="radio" name="type" value="B"> 유형 B: 뜻 → 영어</label>
+      </div>
+      <label style="font-weight:400"><input type="checkbox" id="chkShuffle" checked> 문제 순서 무작위로 섞기</label>
+      <div style="margin-top:12px"><button class="btn" id="btnStart">테스트 시작</button></div>
+    </div>
+
+    <div class="card" id="quiz" hidden></div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2>회차별 테스트 기록</h2>
+        <button class="btn del sm" data-act="clearResults">기록 지우기</button>
+      </div>
+      <div id="history"></div>
+    </div>
+  </section>
+
+  <!-- ===== 3-2. 동기화 설정 화면 ===== -->
+  <section id="viewSync" hidden>
+    <div class="card">
+      <h2>☁ 기기 간 자료 동기화 (GitHub)</h2>
+      <p class="muted" style="margin-top:0">단어 자료를 내 GitHub 저장소의 <b>data.json</b> 파일에 저장해서 PC·스마트폰이 같은 자료를 씁니다.
+        읽기는 누구나(토큰 불필요), 수정은 <b>토큰을 입력한 기기</b>에서만 됩니다. 테스트 결과 기록은 각 기기에만 저장됩니다.</p>
+      <div class="grid2">
+        <div><label for="cfgOwner">GitHub 아이디</label><input type="text" id="cfgOwner" placeholder="예: honggildong" autocomplete="off" autocapitalize="off"></div>
+        <div><label for="cfgRepo">저장소 이름</label><input type="text" id="cfgRepo" placeholder="예: vocab" autocomplete="off" autocapitalize="off"></div>
+      </div>
+      <label for="cfgBranch">브랜치 <small>(비워 두면 기본 브랜치)</small></label>
+      <input type="text" id="cfgBranch" placeholder="main" autocomplete="off" autocapitalize="off">
+      <label for="cfgToken">토큰 <small>(단어를 수정할 기기에만 입력 · 이 기기의 브라우저에만 저장됩니다)</small></label>
+      <input type="password" id="cfgToken" placeholder="github_pat_..." autocomplete="off">
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="btnCfgSave">설정 저장</button>
+        <button class="btn sub" id="btnPull">GitHub에서 불러오기</button>
+        <button class="btn sub" id="btnPushAll">이 기기 자료를 GitHub로 올리기</button>
+      </div>
+      <p><small id="cfgMsg"></small></p>
+    </div>
+    <div class="card">
+      <h2>토큰 만드는 방법 (한 번만)</h2>
+      <ol style="padding-left:20px;margin:0">
+        <li>GitHub 로그인 → 오른쪽 위 프로필 → <b>Settings</b> → 맨 아래 <b>Developer settings</b></li>
+        <li><b>Personal access tokens → Fine-grained tokens → Generate new token</b></li>
+        <li>Expiration(만료일)은 길게(예: 1년), <b>Repository access → Only select repositories</b>에서 단어장 저장소 하나만 선택</li>
+        <li><b>Permissions → Repository permissions → Contents → Read and write</b></li>
+        <li>Generate token을 누르고 나온 <code>github_pat_...</code> 문자열을 위 칸에 붙여넣은 뒤 <b>설정 저장</b></li>
+      </ol>
+      <p class="muted" style="margin-bottom:0">⚠ 토큰은 비밀번호처럼 다루세요. 저장소에 올리거나 남에게 공유하지 마세요.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ===== 4. 데이터 저장 (localStorage) ===== */
+const KEY = 'vocab_app_v1';
+// 데이터 구조: { rounds:[{id, words:[{id,en,meanings:[{pos,ko,syn}]}]}], results:[{id,round,type,total,correct,wrong,rate,date}] }
+let db = loadDB();
+function loadDB(){
+  try{ const d = JSON.parse(localStorage.getItem(KEY)); if(d && Array.isArray(d.rounds)) return migrate(d); }catch(e){}
+  return { rounds:[], results:[] };
+}
+// 이전 버전(ko 문자열 하나) 데이터를 새 구조(meanings 배열)로 변환
+function migrate(d){
+  d.rounds.forEach(r => r.words.forEach(w => {
+    if(!Array.isArray(w.meanings)){ w.meanings = w.ko ? [{ pos:'', ko:w.ko }] : []; delete w.ko; }
+    // 예전 버전의 '단어 전체 유의어'는 첫 번째 뜻 세트로 옮김 (이제 유의어는 뜻마다 따로 저장)
+    if(w.syn){ if(w.meanings[0] && !w.meanings[0].syn) w.meanings[0].syn = w.syn; }
+    delete w.syn;
+    w.meanings.forEach(m => { m.syn = m.syn || ''; });
+  }));
+  d.rounds.sort((a,b) => a.id - b.id);
+  return d;
+}
+function saveLocal(){                       // 이 기기(브라우저)에만 저장 (테스트 기록 등)
+  try{ localStorage.setItem(KEY, JSON.stringify(db)); }
+  catch(e){ alert('저장에 실패했습니다. 브라우저 저장 공간을 확인하세요.'); }
+}
+function saveDB(){ saveLocal(); schedulePush(); }   // 단어 자료 변경: 이 기기에 저장 + GitHub로 동기화
+
+/* ===== 5. 공통 도구 ===== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const getRound = id => db.rounds.find(r => r.id === id);
+const norm = s => String(s).trim().toLowerCase().replace(/\s+/g,' ').replace(/[.。]+$/,'');   // 대소문자·앞뒤 공백·끝 마침표 무시
+const normLoose = s => String(s).toLowerCase().replace(/\s+/g,'').replace(/[.。]+$/,'');   // 뜻 비교용(모든 공백·끝 마침표 무시)
+const splitList = s => String(s).split(/[,;，、]/).map(x=>x.trim()).filter(Boolean);   // 쉼표로 나누고 각 항목의 앞뒤 공백 자동 제거
+const cleanList = s => splitList(s).join(', ');                                           // 저장용: "녹다 ,녹이다" → "녹다, 녹이다"
+const shuffle = a => { a = a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const typeName = t => t==='A' ? '영어→뜻' : '뜻→영어';
+
+// 품사 목록 [저장값, 한글 이름] — 품사를 추가/삭제하려면 여기만 고치세요
+const POS = [['n.','명사'],['v.','동사'],['adj.','형용사'],['adv.','부사'],['prep.','전치사'],['conj.','접속사'],['pron.','대명사'],['interj.','감탄사'],['기타','기타']];
+const posOptions = sel => '<option value="">품사 선택</option>' + POS.map(([v,n]) => `<option value="${esc(v)}"${v===sel?' selected':''}>${n}${v===n?'':' ('+v+')'}</option>`).join('');
+// 품사 선택 + 뜻 입력 한 줄
+const meaningRow = (m={}) => `<div class="mrow"><select class="mPos">${posOptions(m.pos||'')}</select><input type="text" class="mKo" value="${esc(m.ko||'')}" placeholder="한글 뜻 (예: 버리다, 포기하다)" autocomplete="off"><button type="button" class="btn del sm" data-act="rmMeaning" title="이 세트 삭제">✕</button><input type="text" class="mSyn" value="${esc(m.syn||'')}" placeholder="이 뜻의 유의어 (쉼표로 구분, 예: desert, quit)" autocomplete="off"></div>`;
+const setMeaningRows = list => { $('#meaningRows').innerHTML = (list.length ? list : [{}]).map(m => meaningRow(m)).join(''); };
+const readMeaningRows = sel => [...document.querySelectorAll(sel + ' .mrow')].map(r => ({ pos:r.querySelector('.mPos').value, ko:r.querySelector('.mKo').value.trim(), syn:r.querySelector('.mSyn').value.trim() }));
+const tagPos = p => p ? `<span class="tag pos">${esc(p)}</span>` : '';
+// withSyn=true 이면 각 뜻 옆에 그 뜻의 유의어도 표시
+const meaningsHTML = (ms, withSyn) => ms.map(m => `<div class="mline">${tagPos(m.pos)}${esc(m.ko)}${withSyn ? splitList(m.syn||'').map(x => `<span class="tag syn"><span class="lbl">유의어</span>${esc(x)}</span>`).join('') : ''}</div>`).join('');
+// 유의어 채점 결과를 칩(✓/✗)으로 표시
+const synChips = r => r.hasAnswer
+  ? r.items.map(i => `<span class="tag ${i.hit?'ok':'none'}">${i.hit?'✓ ':''}${esc(i.text)}</span>`).join('') + r.extra.map(x => `<span class="tag bad" title="등록된 항목에 없음">✗ ${esc(x)}</span>`).join('')
+  : '<span class="muted">등록된 유의어 없음</span>';
+
+/* ===== 6. 화면 전환 ===== */
+function showView(name){
+  $('#viewAdmin').hidden = name !== 'admin';
+  $('#viewTest').hidden = name !== 'test';
+  $('#viewSync').hidden = name !== 'sync';
+  $('#tabAdmin').classList.toggle('on', name==='admin');
+  $('#tabTest').classList.toggle('on', name==='test');
+  $('#tabSync').classList.toggle('on', name==='sync');
+  if(name==='admin') renderAdmin(); else if(name==='test') renderTestSetup(); else fillCfg();
+}
+$('#tabAdmin').onclick = () => showView('admin');
+$('#tabTest').onclick = () => showView('test');
+$('#tabSync').onclick = () => showView('sync');
+$('#syncStatus').onclick = () => showView('sync');
+
+/* ===== 7. 관리자 기능 ===== */
+let adminRound = db.rounds.length ? db.rounds[db.rounds.length-1].id : null;
+let editingId = null;
+
+function newRound(){
+  if(!guardEdit()) return;
+  const n = Number($('#inRoundNo').value), msg = $('#roundMsg');                   // 회차 번호 직접 입력
+  if(!Number.isInteger(n) || n < 1){ msg.textContent = '회차 번호는 1 이상의 정수로 입력하세요.'; return; }
+  if(getRound(n)){ adminRound = n; renderAdmin(); msg.textContent = `${n}회차는 이미 있어서 해당 회차를 열었습니다.`; return; }
+  db.rounds.push({ id:n, words:[] });
+  db.rounds.sort((a,b) => a.id - b.id);
+  adminRound = n; resetForm(); saveDB(); renderAdmin();
+  $('#inRoundNo').value = n + 1;                                                   // 다음 번호를 미리 채움(수정 가능)
+  msg.textContent = ''; $('#inEn').focus();
+}
+function deleteRound(){
+  if(!guardEdit()) return;
+  const r = getRound(adminRound); if(!r) return;
+  if(!confirm(`${r.id}회차와 단어 ${r.words.length}개를 삭제할까요?`)) return;
+  db.rounds = db.rounds.filter(x => x.id !== r.id);
+  db.results = db.results.filter(x => x.round !== r.id);
+  adminRound = db.rounds.length ? db.rounds[db.rounds.length-1].id : null;
+  resetForm(); saveDB(); renderAdmin();
+}
+function saveWord(){
+  if(!guardEdit()) return;
+  const r = getRound(adminRound); if(!r) return;
+  const en = $('#inEn').value.trim();
+  const meanings = readMeaningRows('#meaningRows')
+    .map(m => ({ pos:m.pos, ko:cleanList(m.ko), syn:cleanList(m.syn) }))              // 쉼표 앞뒤 공백 자동 정리
+    .filter(m => m.pos || m.ko || m.syn);                                              // 빈 세트는 무시
+  if(!en){ $('#formMsg').textContent = '영어 단어를 입력하세요.'; return; }
+  if(!meanings.length){ $('#formMsg').textContent = '품사와 뜻을 하나 이상 입력하세요.'; return; }
+  if(meanings.some(m => !m.pos || !m.ko)){ $('#formMsg').textContent = '각 줄마다 품사를 선택하고 뜻을 입력하세요.'; return; }
+  if(editingId){
+    Object.assign(r.words.find(w=>w.id===editingId), {en, meanings});
+  } else {
+    r.words.push({ id:uid(), en, meanings });
+  }
+  resetForm(); saveDB(); renderAdmin(); $('#inEn').focus();
+}
+function editWord(id){
+  const w = getRound(adminRound).words.find(x=>x.id===id); if(!w) return;
+  editingId = id;
+  $('#inEn').value = w.en; setMeaningRows(w.meanings);
+  $('#btnSave').textContent = '수정 저장'; $('#btnCancel').hidden = false;
+  $('#formMsg').textContent = '수정 중입니다.';
+  $('#inEn').focus(); window.scrollTo({top:$('#wordPanel').offsetTop-10, behavior:'smooth'});
+}
+function deleteWord(id){
+  if(!guardEdit()) return;
+  const r = getRound(adminRound);
+  if(!confirm('이 단어를 삭제할까요?')) return;
+  r.words = r.words.filter(w => w.id !== id);
+  if(editingId === id) resetForm();
+  saveDB(); renderAdmin();
+}
+/* 표(CSV) 다운로드: 엑셀·구글 시트·한셀에서 표로 열립니다 (한글 깨짐 방지용 BOM 포함) */
+function downloadCSV(roundIds){
+  const rows = [['회차','번호','영어 단어','품사','한글 뜻','유의어']];     // 뜻 세트마다 한 줄 (단어·번호는 반복)
+  roundIds.forEach(id => {
+    const r = getRound(id); if(!r) return;
+    r.words.forEach((w,i) => w.meanings.forEach(m => rows.push([
+      `${r.id}회차`, i+1, w.en, m.pos, m.ko, splitList(m.syn||'').join(', ')
+    ])));
+  });
+  if(rows.length === 1){ alert('다운로드할 단어가 없습니다.'); return; }
+  const cell = c => { let t = String(c); if(/^[=+\-@]/.test(t)) t = "'" + t; return '"' + t.replace(/"/g,'""') + '"'; };   // 수식 오인 방지
+  const csv = '\ufeff' + rows.map(r => r.map(cell).join(',')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = roundIds.length === 1 ? `단어장_${roundIds[0]}회차.csv` : '단어장_전체회차.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function resetForm(){
+  editingId = null;
+  $('#inEn').value = ''; setMeaningRows([]);
+  $('#btnSave').textContent = '단어 추가'; $('#btnCancel').hidden = true; $('#formMsg').textContent = '';
+}
+function renderAdmin(){
+  $('#roBanner').hidden = canEdit();
+  const totalWords = db.rounds.reduce((n,r)=>n+r.words.length,0);
+  $('#totalInfo').textContent = db.rounds.length ? `(${db.rounds.length}회차 · 총 ${totalWords}단어)` : '';
+  $('#roundChips').innerHTML = db.rounds.map(r =>
+    `<button class="chip ${r.id===adminRound?'on':''}" data-act="pickRound" data-id="${r.id}">${r.id}회차 <small>${r.words.length}단어</small></button>`
+  ).join('') || '<p class="muted">아직 회차가 없습니다. “새 회차 만들기”를 눌러 시작하세요.</p>';
+
+  const r = getRound(adminRound);
+  $('#wordPanel').hidden = !r;
+  if(!r) return;
+  $('#panelTitle').textContent = `${r.id}회차 · 등록 단어 ${r.words.length}개`;
+  $('#wordList').innerHTML = r.words.map((w,i) => `
+    <div class="word">
+      <div>
+        <span class="muted">${i+1}.</span> <span class="en">${esc(w.en)}</span><br>
+        <div style="margin-top:4px">${meaningsHTML(w.meanings, true)}</div>
+      </div>
+      <div class="row">
+        <button class="btn sub sm" data-act="editWord" data-id="${w.id}">수정</button>
+        <button class="btn del sm" data-act="delWord" data-id="${w.id}">삭제</button>
+      </div>
+    </div>`).join('') || '<p class="muted">이 회차에 등록된 단어가 없습니다. 위 입력창에서 추가하세요.</p>';
+}
+$('#btnSave').onclick = saveWord;
+$('#btnCancel').onclick = resetForm;
+$('#wordPanel').addEventListener('keydown', e => { if(e.key==='Enter' && e.target.tagName==='INPUT') saveWord(); });
+$('#inRoundNo').addEventListener('keydown', e => { if(e.key==='Enter') newRound(); });
+
+/* ===== 8. 채점 로직 ===== */
+// 쉼표 목록 채점 (뜻·유의어 공통)
+//  - 등록된 항목 중 하나 이상 입력하면 정답 (미입력은 오답)
+//  - 입력한 항목 중 등록되지 않은 것이 섞이면 오답 (찍기 방지)
+//  - 등록된 목록이 아예 없으면 항상 정답으로 처리, 순서·대소문자·공백은 무시
+function checkList(user, answer, loose){
+  const key = loose ? normLoose : norm;
+  const a = splitList(answer).map(t => ({ text:t, key:key(t) }));
+  const typed = splitList(user);
+  const keys = typed.map(key);
+  const items = a.map(x => ({ text:x.text, hit:keys.includes(x.key) }));
+  const extra = typed.filter(t => !a.some(x => x.key === key(t)));
+  const hasAnswer = a.length > 0;
+  return { items, extra, hasAnswer, ok: hasAnswer ? (items.some(i => i.hit) && extra.length === 0) : true };
+}
+const checkSynonyms = (user, answer) => checkList(user, answer, false);
+
+// 품사+뜻 세트 채점: 품사가 같고 뜻이 하나라도 겹치는 세트끼리 짝지은 뒤, 뜻과 유의어를 각각 채점
+function checkMeanings(user, answer){
+  const pool = user.map(u => ({ ...u, used:false }));
+  const items = answer.map(a => {
+    const aKeys = splitList(a.ko).map(normLoose);
+    const hit = pool.find(u => !u.used && (!a.pos || u.pos === a.pos) && splitList(u.ko).some(t => aKeys.includes(normLoose(t))));
+    if(hit) hit.used = true;
+    const mean = checkList(hit ? hit.ko : '', a.ko, true);
+    const syn = checkList(hit ? hit.syn : '', a.syn, false);
+    return { a, hit, mean, syn, meanOk: !!hit && mean.ok, ok: !!hit && mean.ok && syn.ok };
+  });
+  const extra = pool.filter(u => !u.used);
+  return { items, extra, ok: items.every(i => i.ok) && extra.length === 0 };
+}
+
+/* ===== 9. 테스트 화면 ===== */
+let T = null; // 진행 중인 테스트 상태 (원본 데이터는 읽기만 함)
+
+function renderTestSetup(){
+  const sel = $('#selRound'), prev = sel.value;
+  const usable = db.rounds.filter(r => r.words.length > 0);
+  sel.innerHTML = usable.map(r => `<option value="${r.id}">${r.id}회차 (${r.words.length}단어)</option>`).join('')
+    || '<option value="">등록된 단어가 없습니다</option>';
+  if(prev && usable.some(r=>String(r.id)===prev)) sel.value = prev;
+  $('#btnStart').disabled = !usable.length;
+  renderHistory();
+}
+function startTest(){
+  const r = getRound(Number($('#selRound').value)); if(!r) return;
+  const type = document.querySelector('input[name=type]:checked').value;
+  const words = r.words.map(w => ({...w}));                 // 복사본 사용 → 원본 보호
+  T = { round:r.id, type, qs: $('#chkShuffle').checked ? shuffle(words) : words, idx:0, correct:0, wrong:0, submitted:false, log:[] };
+  $('#setup').hidden = true; $('#quiz').hidden = false;
+  renderQuestion();
+}
+function renderQuestion(){
+  const q = T.qs[T.idx], A = T.type === 'A';
+  const pct = Math.round(T.idx / T.qs.length * 100);
+  $('#quiz').innerHTML = `
+    <div class="row" style="justify-content:space-between"><b>${T.round}회차 · ${typeName(T.type)}</b><span class="muted">${T.idx+1} / ${T.qs.length}</span></div>
+    <div class="progress"><div style="width:${pct}%"></div></div>
+    <div class="prompt"><small>${A?'영어 단어':'품사 및 한글 뜻'}</small>
+      ${A ? `<div class="big">${esc(q.en)}</div>` : `<div style="font-size:1.4rem;font-weight:700">${meaningsHTML(q.meanings)}</div>`}</div>
+    ${A ? `<label>품사 · 한글 뜻 · 유의어 <small>(뜻 세트가 여러 개면 ＋ 버튼으로 추가 · 쉼표로 여러 개 쓸 때는 등록된 것 중 하나만 맞혀도 됩니다)</small></label>
+      <div class="mrows" id="quizRows">${meaningRow()}</div>
+      <button class="btn sub sm" type="button" data-act="addMeaning" data-target="#quizRows" style="margin-top:8px">＋ 품사/뜻 추가</button>`
+    : `<label for="ansMain">영어 단어</label>
+      <input type="text" id="ansMain" autocomplete="off" autocapitalize="off" placeholder="영어 단어 입력">
+      <label>뜻별 유의어 <small>(쉼표로 구분)</small></label>
+      ${q.meanings.map((m,i) => `<div class="bsyn"><div class="mline">${tagPos(m.pos)}${esc(m.ko)}</div>
+        <input type="text" class="bSyn" data-i="${i}" autocomplete="off" autocapitalize="off" placeholder="${m.syn.trim() ? '이 뜻의 유의어' : '등록된 유의어 없음'}"></div>`).join('')}`}
+    <div class="row" style="margin-top:12px"><button class="btn" id="btnSubmit">제출</button></div>
+    <div id="feedback"></div>`;
+  T.submitted = false;
+  $('#btnSubmit').onclick = onSubmit;
+  $('#quiz input, #quiz select').focus();
+}
+function onSubmit(){
+  if(T.submitted){ nextQuestion(); return; }
+  const q = T.qs[T.idx], A = T.type === 'A';
+  let ok, detail;
+  if(A){
+    const rows = readMeaningRows('#quizRows').filter(m => m.pos || m.ko || m.syn);
+    const mm = checkMeanings(rows, q.meanings);
+    ok = mm.ok;
+    detail = mm.items.map(i => `<div class="setbox"><div class="cmp">
+        <b>뜻 (정답)</b><span>${tagPos(i.a.pos)}${synChips(i.mean)}</span>
+        <b>뜻 (내 답)</b><span class="${i.meanOk?'mark-ok':'mark-bad'}">${i.hit ? `${esc(i.hit.pos)} ${esc(i.hit.ko)} ✓` : '(맞는 세트 없음) ✗'}</span>
+        <b>유의어 (정답)</b><span>${synChips(i.syn)}</span>
+        <b>유의어 (내 답)</b><span class="${i.syn.ok?'mark-ok':'mark-bad'}">${esc(i.hit ? i.hit.syn : '') || '(빈칸)'} ${i.syn.hasAnswer ? (i.syn.ok?'✓':'✗') : ''}</span>
+      </div></div>`).join('')
+      + mm.extra.map(u => `<div class="setbox"><div class="cmp"><b>잘못 쓴 세트</b><span><span class="tag ex">${esc(u.pos||'-')} ${esc(u.ko)}</span> <small>정답 목록에 없음</small></span></div></div>`).join('');
+  } else {
+    const uMain = $('#ansMain').value, mainOk = norm(uMain) === norm(q.en);
+    const syns = q.meanings.map((m,i) => {
+      const txt = document.querySelector(`.bSyn[data-i="${i}"]`).value;
+      return { m, txt, r:checkSynonyms(txt, m.syn) };
+    });
+    ok = mainOk && syns.every(x => x.r.ok);
+    detail = `<div class="cmp">
+        <b>영어 (정답)</b><span>${esc(q.en)}</span>
+        <b>영어 (내 답)</b><span class="${mainOk?'mark-ok':'mark-bad'}">${esc(uMain.trim()) || '(빈칸)'} ${mainOk?'✓':'✗'}</span></div>`
+      + syns.map(x => `<div class="setbox"><div class="cmp">
+        <b>뜻</b><span>${tagPos(x.m.pos)}${esc(x.m.ko)}</span>
+        <b>유의어 (정답)</b><span>${synChips(x.r)}</span>
+        <b>유의어 (내 답)</b><span class="${x.r.ok?'mark-ok':'mark-bad'}">${esc(x.txt.trim()) || '(빈칸)'} ${x.r.hasAnswer ? (x.r.ok?'✓':'✗') : ''}</span>
+      </div></div>`).join('');
+  }
+  T.submitted = true;
+  ok ? T.correct++ : T.wrong++;
+  T.log.push({ id:q.id, ok });
+  $('#feedback').innerHTML = `<div class="result-box ${ok?'ok':'bad'}"><b>${ok ? '⭕ 정답입니다!' : '❌ 오답입니다'}</b>${detail}</div>`;
+  document.querySelectorAll('#quiz input, #quiz select, #quiz [data-act]').forEach(x => x.disabled = true);   // 제출 후 입력 잠금
+  const b = $('#btnSubmit');
+  b.textContent = T.idx + 1 < T.qs.length ? '다음 문제 →' : '결과 보기';
+  b.focus();
+}
+function nextQuestion(){
+  if(T.idx + 1 < T.qs.length){ T.idx++; renderQuestion(); }
+  else finishTest();
+}
+function finishTest(){
+  const total = T.qs.length, rate = Math.round(T.correct / total * 100);
+  db.results.push({ id:uid(), round:T.round, type:T.type, total, correct:T.correct, wrong:T.wrong, rate, date:new Date().toISOString() });
+  saveLocal();
+  $('#quiz').innerHTML = `
+    <h2>🎉 ${T.round}회차 · ${typeName(T.type)} 결과</h2>
+    <div class="score">
+      <div><small>총 문제</small><b>${total}</b></div>
+      <div><small>정답</small><b style="color:var(--ok)">${T.correct}</b></div>
+      <div><small>오답</small><b style="color:var(--bad)">${T.wrong}</b></div>
+      <div><small>정답률</small><b>${rate}%</b></div>
+    </div>
+    <div class="row">
+      <button class="btn" id="btnRetry">같은 설정으로 다시 풀기</button>
+      <button class="btn sub" id="btnBack">설정으로 돌아가기</button>
+    </div>`;
+  $('#btnRetry').onclick = startTest;
+  $('#btnBack').onclick = () => { $('#quiz').hidden = true; $('#setup').hidden = false; renderTestSetup(); };
+  renderHistory();
+}
+function renderHistory(){
+  if(!db.results.length){ $('#history').innerHTML = '<p class="muted">아직 테스트 기록이 없습니다.</p>'; return; }
+  const ids = [...new Set(db.results.map(r=>r.round))].sort((a,b)=>a-b);
+  $('#history').innerHTML = ids.map(id => {
+    const rows = db.results.filter(r=>r.round===id).slice().reverse();
+    return `<h3 style="margin:14px 0 4px;font-size:1rem">${id}회차 <small>(${rows.length}회 응시)</small></h3>
+      <div style="overflow-x:auto"><table><tr><th>일시</th><th>유형</th><th>정답/전체</th><th>정답률</th></tr>
+      ${rows.map(r=>`<tr><td>${new Date(r.date).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</td>
+        <td>${typeName(r.type)}</td><td>${r.correct}/${r.total}</td><td><b>${r.rate}%</b></td></tr>`).join('')}</table></div>`;
+  }).join('');
+}
+$('#btnStart').onclick = startTest;
+
+/* ===== 10. 클릭 이벤트 모음 (data-act 버튼 처리) ===== */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if(!el) return;
+  const id = el.dataset.id, act = el.dataset.act;
+  if(act==='newRound') newRound();
+  else if(act==='delRound') deleteRound();
+  else if(act==='dlRound') downloadCSV([adminRound]);
+  else if(act==='dlAll') downloadCSV(db.rounds.map(r => r.id));
+  else if(act==='pickRound'){ adminRound = Number(id); resetForm(); renderAdmin(); $('#roundMsg').textContent = ''; }
+  else if(act==='editWord') editWord(id);
+  else if(act==='delWord') deleteWord(id);
+  else if(act==='addMeaning') $(el.dataset.target).insertAdjacentHTML('beforeend', meaningRow());
+  else if(act==='rmMeaning'){
+    const box = el.closest('.mrows'); el.closest('.mrow').remove();
+    if(!box.querySelector('.mrow')) box.insertAdjacentHTML('beforeend', meaningRow());
+  }
+  else if(act==='clearResults'){ if(confirm('모든 테스트 기록을 지울까요? (단어 자료는 유지됩니다)')){ db.results = []; saveLocal(); renderHistory(); } }
+});
+
+$('#quiz').addEventListener('keydown', e => { if(e.key==='Enter' && e.target.tagName==='INPUT' && $('#btnSubmit')) onSubmit(); });
+
+/* ===== 10.5 GitHub 동기화 (PC·스마트폰이 같은 단어 자료를 사용) =====
+   - 단어 자료(rounds)는 저장소의 data.json 에 저장 (GitHub Contents API 사용, 서버·유료 서비스 없음)
+   - 읽기: 토큰 없이 가능 / 쓰기: 토큰이 있는 기기만 가능
+   - 두 기기가 동시에 수정하면 sha(버전) 검사로 덮어쓰기를 막음 */
+const CFG_KEY = 'vocab_sync_cfg';
+let cfg = loadCfg(), remoteSha = null, pushTimer = null, pushing = false, pushAgain = false, lastPull = 0;
+
+function loadCfg(){
+  let c = {};
+  try{ c = JSON.parse(localStorage.getItem(CFG_KEY)) || {}; }catch(e){}
+  // GitHub Pages 주소(https://아이디.github.io/저장소/)에서 아이디·저장소 이름을 자동으로 채움
+  if(!c.owner && location.hostname.endsWith('.github.io')){
+    c.owner = location.hostname.split('.')[0];
+    c.repo = location.pathname.split('/')[1] || location.hostname;
+  }
+  return { owner:'', repo:'', branch:'', token:'', ...c };
+}
+const syncOn = () => !!(cfg.owner && cfg.repo);
+const canEdit = () => !syncOn() || !!cfg.token;
+function guardEdit(){
+  if(canEdit()) return true;
+  alert('이 기기는 읽기 전용입니다. ☁ 동기화 탭에서 GitHub 토큰을 입력하면 수정할 수 있습니다.');
+  return false;
+}
+const setStatus = t => { $('#syncStatus').textContent = t; };
+function refreshStatus(){
+  setStatus(!syncOn() ? '💾 이 기기에만 저장 중 (☁ 동기화 설정 안 됨)'
+    : !cfg.token ? '☁ 읽기 전용 (GitHub에서 불러옴)'
+    : db.dirty ? '⚠ 아직 GitHub에 저장되지 않은 변경이 있음' : '☁ 동기화 사용 중');
+}
+// 한글이 들어간 문자열 ↔ base64
+const b64 = str => { let bin = ''; new TextEncoder().encode(str).forEach(x => bin += String.fromCharCode(x)); return btoa(bin); };
+const unb64 = str => new TextDecoder().decode(Uint8Array.from(atob(str.replace(/\s/g,'')), c => c.charCodeAt(0)));
+const ghUrl = () => `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/data.json`;
+const ghHeaders = () => { const h = { 'Accept':'application/vnd.github+json' }; if(cfg.token) h.Authorization = 'Bearer ' + cfg.token; return h; };
+
+// GitHub → 이 기기 (mode: 'auto' 변경 없을 때만 / 'force' 무조건 덮어씀 / 'shaOnly' 버전 정보만 갱신)
+async function pullRemote(mode){
+  if(!syncOn()) return;
+  lastPull = Date.now(); setStatus('☁ 불러오는 중…');
+  try{
+    const q = (cfg.branch ? 'ref=' + encodeURIComponent(cfg.branch) + '&' : '') + 't=' + Date.now();
+    const res = await fetch(ghUrl() + '?' + q, { headers:ghHeaders(), cache:'no-store' });
+    if(res.status === 404){ remoteSha = null; setStatus('☁ GitHub에 data.json 이 아직 없음 (단어를 저장하거나 "올리기"를 누르세요)'); return; }
+    if(res.status === 401){ setStatus('⚠ 토큰이 올바르지 않거나 만료됨'); return; }
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const j = await res.json();
+    remoteSha = j.sha;
+    if(mode === 'shaOnly') return;
+    if(db.dirty && mode !== 'force'){ refreshStatus(); return; }          // 저장 안 된 내 변경은 보호
+    const d = migrate({ rounds: JSON.parse(unb64(j.content)).rounds || [] });
+    db.rounds = d.rounds; db.dirty = false; saveLocal();
+    if(!getRound(adminRound)) adminRound = db.rounds.length ? db.rounds[db.rounds.length-1].id : null;
+    $('#inRoundNo').value = db.rounds.length ? Math.max(...db.rounds.map(r=>r.id)) + 1 : 1;
+    if(!$('#viewAdmin').hidden) renderAdmin(); else if(!$('#viewTest').hidden) renderTestSetup();
+    refreshStatus();
+  }catch(e){ setStatus('⚠ 불러오기 실패 — 이 기기에 저장된 자료를 보여 줍니다'); }
+}
+// 이 기기 → GitHub (연속 수정은 0.8초 모아서 한 번에 저장)
+function schedulePush(){
+  if(!syncOn() || !cfg.token) return;
+  db.dirty = true; saveLocal(); setStatus('☁ 저장 대기 중…');
+  clearTimeout(pushTimer); pushTimer = setTimeout(pushNow, 800);
+}
+async function ghPut(){
+  const body = { message:'단어장 업데이트 ' + new Date().toLocaleString('ko-KR'),
+                 content:b64(JSON.stringify({ version:1, rounds:db.rounds }, null, 1)) };
+  if(remoteSha) body.sha = remoteSha;
+  if(cfg.branch) body.branch = cfg.branch;
+  const res = await fetch(ghUrl(), { method:'PUT', headers:{ ...ghHeaders(), 'Content-Type':'application/json' }, body:JSON.stringify(body) });
+  if(res.status === 409 || res.status === 422) throw { conflict:true };
+  if(!res.ok) throw { status:res.status };
+  remoteSha = (await res.json()).content.sha;
+}
+async function pushNow(){
+  if(pushing){ pushAgain = true; return; }
+  pushing = true; setStatus('☁ GitHub에 저장 중…');
+  try{
+    do{ pushAgain = false; await ghPut(); }while(pushAgain);
+    db.dirty = false; saveLocal(); setStatus('☁ 동기화됨 ✓');
+  }catch(e){
+    setStatus('⚠ GitHub 저장 실패');
+    alert(e.conflict ? '다른 기기에서 먼저 수정한 자료가 있어 저장하지 않았습니다.\n☁ 동기화 탭에서 "GitHub에서 불러오기"를 누른 뒤 다시 수정해 주세요.'
+      : e.status === 401 ? '토큰이 올바르지 않거나 만료되었습니다. ☁ 동기화 탭에서 토큰을 확인하세요.'
+      : (e.status === 403 || e.status === 404) ? '저장소에 쓸 권한이 없습니다. 토큰의 Contents(Read and write) 권한과 저장소 선택, 아이디·저장소 이름을 확인하세요.'
+      : '네트워크 오류로 저장하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도하세요.');
+  }
+  pushing = false;
+}
+
+// 동기화 설정 화면
+function fillCfg(){
+  $('#cfgOwner').value = cfg.owner; $('#cfgRepo').value = cfg.repo; $('#cfgBranch').value = cfg.branch; $('#cfgToken').value = cfg.token;
+  refreshStatus();
+}
+$('#btnCfgSave').onclick = () => {
+  cfg = { owner:$('#cfgOwner').value.trim(), repo:$('#cfgRepo').value.trim(), branch:$('#cfgBranch').value.trim(), token:$('#cfgToken').value.trim() };
+  try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }catch(e){}
+  $('#cfgMsg').textContent = syncOn() ? '설정을 저장했습니다. GitHub에서 자료를 불러옵니다…' : '설정을 저장했습니다. (동기화 꺼짐: 이 기기에만 저장)';
+  refreshStatus(); pullRemote('auto');
+};
+$('#btnPull').onclick = () => {
+  if(!syncOn()){ $('#cfgMsg').textContent = '먼저 GitHub 아이디와 저장소 이름을 저장하세요.'; return; }
+  if(db.dirty && !confirm('GitHub에 저장되지 않은 이 기기의 변경이 사라집니다. 계속할까요?')) return;
+  pullRemote('force').then(() => { $('#cfgMsg').textContent = '불러오기를 마쳤습니다.'; });
+};
+$('#btnPushAll').onclick = async () => {
+  if(!syncOn() || !cfg.token){ $('#cfgMsg').textContent = '아이디·저장소·토큰을 모두 입력하고 저장하세요.'; return; }
+  if(!confirm('GitHub의 단어 자료를 이 기기의 자료로 덮어씁니다. 계속할까요?')) return;
+  await pullRemote('shaOnly'); db.dirty = true; await pushNow();
+  $('#cfgMsg').textContent = db.dirty ? '올리기에 실패했습니다.' : '올리기를 마쳤습니다.';
+};
+document.addEventListener('visibilitychange', () => {   // 다른 앱에 갔다 돌아오면 최신 자료 확인
+  if(document.visibilityState === 'visible' && syncOn() && !pushing && Date.now() - lastPull > 30000) pullRemote('auto');
+});
+
+/* ===== 11. 시작 ===== */
+setMeaningRows([]);
+$('#inRoundNo').value = db.rounds.length ? Math.max(...db.rounds.map(r=>r.id)) + 1 : 1;   // 회차 번호 기본값(직접 수정 가능)
+renderAdmin();
+refreshStatus();
+if(syncOn()) pullRemote('auto');   // GitHub 동기화가 설정되어 있으면 최신 자료를 불러옴
+</script>
+</body>
+</html>
